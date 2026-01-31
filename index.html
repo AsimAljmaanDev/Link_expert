@@ -1,264 +1,215 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>Link Expert | Management Pro</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<style>
-		:root {
-			--bg: #050505;
-			--panel: rgba(22, 22, 24, 0.9);
-			--text: #e0e0e0;
-			--accent: #d4af37; /* Royal Gold */
-			--border: rgba(212, 175, 55, 0.25);
-			--glass: rgba(255, 255, 255, 0.05);
-			--blur: blur(25px);
-			--max-w: 500px;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Link Expert Pro | Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050505; --panel: #121214; --text: #e0e0e0; --accent: #d4af37;
+            --border: rgba(212, 175, 55, 0.2); --safe: #2ecc71; --danger: #e74c3c;
+        }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; padding-bottom: 80px; }
+        header { background: var(--panel); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        
+        /* Indicators */
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .active-dot { background: var(--safe); box-shadow: 0 0 8px var(--safe); }
+        .inactive-dot { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
-		body.glass-light {
-			--bg: #f2f2f7; --panel: rgba(255, 255, 255, 0.7); --text: #1c1c1e; --accent: #007aff; --border: rgba(0,0,0,0.1);
-		}
+        /* Settings */
+        .settings-pane { display: none; position: absolute; right: 20px; top: 60px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; z-index: 200; overflow: hidden; }
+        .set-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #222; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .set-item:hover { background: var(--accent); color: #000; }
 
-		body.desktop-mode { --max-w: 1200px; }
-		body.desktop-mode #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        /* Cards */
+        .container { padding: 20px; max-width: 500px; margin: auto; }
+        .car-card { background: var(--panel); border: 1px solid var(--border); padding: 20px; border-radius: 15px; margin-bottom: 15px; position: relative; }
+        .plate-no { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 10px 0; color: #fff; }
 
-		body { 
-			margin: 0; background: var(--bg); color: var(--text); 
-			font-family: 'SF Pro Display', -apple-system, sans-serif; transition: 0.4s;
-			padding-bottom: 120px; overflow-x: hidden;
-		}
-
-		/* Overlays */
-		#login { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-		.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10001; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
-
-		.card { 
-			background: var(--panel); backdrop-filter: var(--blur); padding: 30px; 
-			border-radius: 25px; border: 1px solid var(--border); width: 90%; max-width: 400px;
-		}
-
-		header {
-			background: var(--panel); backdrop-filter: var(--blur); padding: 12px 20px;
-			position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border);
-		}
-		.nav-inner { max-width: var(--max-w); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-
-		.container { width: 92%; max-width: var(--max-w); margin: 20px auto; }
-		.search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-		input, select { 
-			width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); 
-			background: var(--glass); color: var(--text); outline: none; box-sizing: border-box; font-size: 14px;
-		}
-		
-		.car-card {
-			background: var(--panel); border-radius: 20px; padding: 20px; margin-bottom: 15px;
-			border: 1px solid var(--border); position: relative; transition: 0.3s;
-		}
-		.c-plate { font-size: 26px; font-weight: 900; letter-spacing: 1px; color: var(--text); margin: 5px 0; }
-
-		/* Settings & Tabs */
-		.settings-pane {
-			display: none; position: absolute; right: 0; top: 55px; 
-			background: var(--panel); min-width: 220px; border-radius: 15px; 
-			border: 1px solid var(--border); overflow: hidden; z-index: 2000;
-		}
-		.set-item { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; }
-		.set-item:hover { background: var(--accent); color: #000; }
-
-		.dock-bar {
-			position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-			width: 90%; max-width: 400px; background: var(--panel); backdrop-filter: var(--blur);
-			border-radius: 50px; border: 1px solid var(--border); display: flex; padding: 6px; z-index: 999;
-		}
-		.tab { flex: 1; text-align: center; padding: 12px; border-radius: 40px; color: var(--text); opacity: 0.4; cursor: pointer; font-size: 20px; }
-		.tab.active { background: var(--accent); color: #000; opacity: 1; }
-
-		.btn-gold { background: var(--accent); color: #000; font-weight: 800; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; }
-		.owner-tools { display: none; gap: 10px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
-	</style>
+        /* Modals */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-box { background: #1a1a1c; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; border: 1px solid var(--border); }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* Tabs */
+        .dock { position: fixed; bottom: 0; width: 100%; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
+        .tab { flex: 1; text-align: center; padding: 15px; opacity: 0.5; font-size: 20px; cursor: pointer; }
+        .tab.active { opacity: 1; color: var(--accent); }
+    </style>
 </head>
-<body class="royal-mode">
+<body>
 
-	<div id="login">
-		<div class="card" style="text-align: center;">
-			<img src="linkexpert.png" style="height: 55px; margin-bottom: 15px;">
-			<h2 style="color: var(--accent); margin-bottom: 20px;">SYSTEM ACCESS</h2>
-			<input type="text" id="u" placeholder="Email (asim@link.sa)" style="margin-bottom:10px">
-			<input type="password" id="p" placeholder="Password" style="margin-bottom:20px">
-			<button class="btn-gold" onclick="doLogin()">AUTHENTICATE</button>
-		</div>
-	</div>
+<header>
+    <div style="font-weight: 800; color: var(--accent);">LINK EXPERT PRO</div>
+    <i class="fas fa-cog" onclick="toggleMenu(event)" style="font-size: 20px; cursor: pointer;"></i>
+    <div id="settings" class="settings-pane">
+        <div class="set-item" onclick="showUserAdmin()" id="admin-opt" style="display:none;"><i class="fas fa-users-cog"></i> User Management</div>
+        <div class="set-item" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+</header>
 
-	<header>
-		<div class="nav-inner">
-			<div style="display:flex; align-items:center; gap:8px;">
-				<img src="linkexpert.png" style="height: 32px;">
-				<span style="font-weight:900; font-size:16px; letter-spacing:1px;">LINK <span style="color:var(--accent)">EXPERT</span></span>
-			</div>
-			<div style="position:relative;">
-				<button class="tab" style="opacity:1;" onclick="toggleSet()"><i class="fas fa-ellipsis-v"></i></button>
-				<div id="setMenu" class="settings-pane">
-					<div class="set-item" onclick="toggleView()"><i id="vIcon" class="fas fa-desktop"></i> Desktop Mode</div>
-					<div id="ownerOnlyMenu" class="set-item" style="display:none;" onclick="openUserConsole()"><i class="fas fa-user-shield"></i> User Management</div>
-					<div class="set-item" onclick="showAbout()"><i class="fas fa-info-circle"></i> About</div>
-					<div class="set-item" onclick="location.reload()" style="color:#ff4444;"><i class="fas fa-sign-out-alt"></i> Logout</div>
-				</div>
-			</div>
-		</div>
-	</header>
+<div class="container" id="view-list">
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" id="searchP" placeholder="Plate #" onkeyup="filter()">
+        <input type="text" id="searchE" placeholder="Employee/Name" onkeyup="filter()">
+    </div>
+    <div id="results"></div>
+</div>
 
-	<div class="container">
-		
-		<section id="pg-list">
-			<div class="search-row">
-				<input type="text" id="searchPlate" placeholder="Plate #" onkeyup="search()">
-				<input type="text" id="searchMeta" placeholder="Name/Model..." onkeyup="search()">
-			</div>
-			<div id="results"></div>
-		</section>
+<div class="container" id="view-add" style="display:none;">
+    <div class="car-card">
+        <h3>New Registration</h3>
+        <input type="text" id="fClient" placeholder="Client Name">
+        <input type="text" id="fPlate" placeholder="Plate Number">
+        <input type="text" id="fModel" placeholder="Car Model">
+        <input type="text" id="fColor" placeholder="Color">
+        <input type="text" id="fEmp" placeholder="Employee Name">
+        <button class="btn" onclick="saveData()">SAVE TO CLOUD</button>
+    </div>
+</div>
 
-		<section id="pg-add" style="display:none">
-			<div class="card" style="max-width: 100%; box-sizing: border-box;">
-				<h3 style="color:var(--accent); margin-top:0;">Register Vehicle</h3>
-				<input type="text" id="fClient" placeholder="Client Name" style="margin-bottom:10px">
-				<input type="text" id="fPlate" placeholder="Plate Number" style="margin-bottom:10px">
-				<input type="text" id="fModel" placeholder="Car Model" style="margin-bottom:10px">
-				<input type="text" id="fColor" placeholder="Color" style="margin-bottom:10px">
-				<input type="text" id="fEmp" placeholder="Employee / Slot" style="margin-bottom:15px">
-				<button class="btn-gold" onclick="saveVehicle()">ADD TO INVENTORY</button>
-			</div>
-		</section>
-	</div>
+<div id="userModal" class="modal">
+    <div class="modal-box">
+        <h3>User Privileges</h3>
+        <div id="user-list-items"></div>
+        <button class="btn" style="background:#444; color:#fff;" onclick="closeM('userModal')">Close</button>
+    </div>
+</div>
 
-	<div id="userModal" class="modal-overlay" onclick="closeModals(event)">
-		<div class="card">
-			<h3 style="color:var(--accent);">Account Management</h3>
-			<div id="userList" style="text-align:left; max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
-			<button class="btn-gold" style="background:#444; color:#fff" onclick="closeModals()">CLOSE</button>
-		</div>
-	</div>
+<div id="editModal" class="modal">
+    <div class="modal-box">
+        <h3>Edit Vehicle</h3>
+        <input type="hidden" id="eIdx">
+        <input type="text" id="eClient">
+        <input type="text" id="ePlate">
+        <select id="eStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+        </select>
+        <button class="btn" onclick="updateCar()">Update</button>
+        <button class="btn" style="background:var(--danger); margin-top:5px;" onclick="deleteCar()">Delete Vehicle</button>
+        <button class="btn" style="background:#444; margin-top:5px;" onclick="closeM('editModal')">Cancel</button>
+    </div>
+</div>
 
-	<nav class="dock-bar">
-		<div class="tab active" onclick="nav('pg-list', this)"><i class="fas fa-th-large"></i></div>
-		<div class="tab" onclick="nav('pg-add', this)"><i class="fas fa-plus-circle"></i></div>
-		<div class="tab" onclick="nav('pg-list', this); loadData();"><i class="fas fa-sync"></i></div>
-	</nav>
+<nav class="dock">
+    <div class="tab active" onclick="showPg('view-list', this)"><i class="fas fa-search"></i></div>
+    <div class="tab" onclick="showPg('view-add', this)"><i class="fas fa-plus-circle"></i></div>
+</nav>
 
-	<script>
-		const DEPLOY_URL = "https://script.google.com/macros/s/AKfycbwDrWky5Zb95J5AdtvOnk30yeedpA2o901dWA9m4F6_UxII86RQDe5rX8kPE_AKIOEe/exec";
-		let db = [];
-		let userRole = "client";
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMJ1n76nkM-s7fwKTJzyxbgYMR__tizWugtfnOvQONWIKChXLP4I1oUoSSzg2aaXZ9/exec"; // REPLACE THIS
+    let db = [];
+    let currentUser = { email: "asim@link.sa", role: "owner" }; // This would be set by your login logic
 
-		// Login Logic
-		function doLogin() {
-			const u = document.getElementById('u').value, p = document.getElementById('p').value;
-			if(u === "asim@link.sa" && p === "707") { userRole = "owner"; startApp(); }
-			else if(u === "abdullah@awtad.sa" && p === "3344") { userRole = "client"; startApp(); }
-			else { alert("Access Denied"); }
-		}
+    // Boot App
+    window.onload = () => {
+        if(currentUser.role === 'owner') document.getElementById('admin-opt').style.display = 'flex';
+        loadData();
+    };
 
-		function startApp() {
-			document.getElementById('login').style.display='none';
-			if(userRole === 'owner') document.getElementById('ownerOnlyMenu').style.display = 'flex';
-			loadData();
-		}
+    async function loadData() {
+        const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRytRL1hkkvWkTEnU0oSTpUSG39VuigUKFyPYcEHLwX0W76gNiGLX5sKNIXSHki16Z6JCBwE8LpW8MU/pub?gid=917848047&single=true&output=csv");
+        const text = await res.text();
+        const rows = text.split('\n').slice(1);
+        db = rows.map((r, i) => {
+            const c = r.split(',').map(v => v.trim());
+            return { rowIdx: i+2, client: c[0], plate: c[1], model: c[2], color: c[3], emp: c[4], status: c[5] };
+        });
+        render(db);
+    }
 
-		// Fetch Data
-		async function loadData() {
-			const r = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRytRL1hkkvWkTEnU0oSTpUSG39VuigUKFyPYcEHLwX0W76gNiGLX5sKNIXSHki16Z6JCBwE8LpW8MU/pub?gid=917848047&single=true&output=csv");
-			const t = await r.text();
-			const lines = t.split('\n').filter(l => l.trim() !== '');
-			db = lines.slice(1).map(l => {
-				const c = l.split(',').map(v => v.trim());
-				return { client: c[0], plate: c[1], model: c[2], color: c[3], emp: c[4] };
-			});
-			render(db);
-		}
+    function render(data) {
+        const container = document.getElementById('results');
+        container.innerHTML = '';
+        data.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'car-card';
+            if(currentUser.role === 'owner') card.onclick = () => openEdit(v);
+            
+            const dotClass = v.status.toLowerCase() === 'active' ? 'active-dot' : 'inactive-dot';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between">
+                    <span><span class="dot ${dotClass}"></span><b>${v.client}</b></span>
+                    <i class="fas fa-edit" style="opacity:0.3"></i>
+                </div>
+                <div class="plate-no">${v.plate}</div>
+                <div style="font-size:12px; opacity:0.6">${v.model} | ${v.color}</div>
+                <div style="font-size:12px; margin-top:5px; color:var(--accent)">Emp: ${v.emp}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
 
-		function render(data) {
-			const res = document.getElementById('results'); res.innerHTML = '';
-			data.forEach((v, idx) => {
-				const card = document.createElement('div');
-				card.className = 'car-card';
-				card.innerHTML = `
-					<div style="display:flex; justify-content:space-between;">
-						<span style="color:var(--accent); font-weight:bold; font-size:12px;">${v.client}</span>
-						<i class="fas fa-share-alt" style="cursor:pointer; color:var(--accent)" onclick="shareCar('${v.client}','${v.plate}')"></i>
-					</div>
-					<div class="c-plate">${v.plate}</div>
-					<div style="font-size:12px; opacity:0.6">${v.model} • ${v.color}</div>
-					<div style="font-size:11px; margin-top:5px; color:var(--accent)">Slot/Emp: ${v.emp}</div>
-					
-					<div class="owner-tools" style="display:${userRole==='owner'?'flex':'none'}">
-						<button onclick="editCard(${idx})" style="background:var(--glass); border:1px solid var(--accent); color:var(--accent); border-radius:5px; flex:1; padding:5px; font-size:10px;">EDIT</button>
-						<button onclick="deleteCard(${idx})" style="background:var(--glass); border:1px solid #ff4444; color:#ff4444; border-radius:5px; flex:1; padding:5px; font-size:10px;">DELETE</button>
-					</div>
-				`;
-				res.appendChild(card);
-			});
-		}
+    function filter() {
+        const p = document.getElementById('searchP').value.toLowerCase();
+        const e = document.getElementById('searchE').value.toLowerCase();
+        const filtered = db.filter(x => x.plate.toLowerCase().includes(p) && (x.client.toLowerCase().includes(e) || x.emp.toLowerCase().includes(e)));
+        render(filtered);
+    }
 
-		// Features
-		function shareCar(n, p) {
-			const msg = `*LINK EXPERT PARKING*\nClient: ${n}\nPlate: ${p}`;
-			if (navigator.share) {
-				navigator.share({ title: 'Vehicle Info', text: msg }).catch(() => shareWA(msg));
-			} else { shareWA(msg); }
-		}
-		function shareWA(m) { window.open(`https://wa.me/?text=${encodeURIComponent(m)}`); }
+    // Vehicle Management
+    function openEdit(v) {
+        document.getElementById('eIdx').value = v.rowIdx;
+        document.getElementById('eClient').value = v.client;
+        document.getElementById('ePlate').value = v.plate;
+        document.getElementById('eStatus').value = v.status;
+        document.getElementById('editModal').style.display = 'flex';
+    }
 
-		function search() {
-			const p = document.getElementById('searchPlate').value.toLowerCase();
-			const m = document.getElementById('searchMeta').value.toLowerCase();
-			const f = db.filter(x => x.plate.toLowerCase().includes(p) && 
-				(x.client.toLowerCase().includes(m) || x.model.toLowerCase().includes(m)));
-			render(f);
-		}
+    async function updateCar() {
+        const payload = {
+            action: "edit_car",
+            rowIdx: document.getElementById('eIdx').value,
+            client: document.getElementById('eClient').value,
+            plate: document.getElementById('ePlate').value,
+            status: document.getElementById('eStatus').value,
+            model: "", color: "", emp: "" // You can add these inputs to modal if needed
+        };
+        await post(payload);
+        location.reload();
+    }
 
-		async function saveVehicle() {
-			const data = {
-				client: document.getElementById('fClient').value,
-				plate: document.getElementById('fPlate').value,
-				model: document.getElementById('fModel').value,
-				color: document.getElementById('fColor').value,
-				emp: document.getElementById('fEmp').value
-			};
-			if(!data.plate) return alert("Plate Required");
-			
-			// Sending to Apps Script
-			try {
-				await fetch(DEPLOY_URL, { method: 'POST', body: JSON.stringify(data) });
-				alert("Saved to Cloud!");
-				location.reload();
-			} catch(e) { alert("Data sent! Refreshing..."); location.reload(); }
-		}
+    async function deleteCar() {
+        if(!confirm("Delete this vehicle?")) return;
+        await post({ action: "delete", plate: document.getElementById('ePlate').value });
+        location.reload();
+    }
 
-		// Owner Only Functions
-		function deleteCard(idx) {
-			if(confirm("Confirm deletion of " + db[idx].plate + "?")) {
-				alert("Executing Delete on Sheet...");
-				// Logic to trigger deletion via DEPLOY_URL goes here
-			}
-		}
+    // User Management
+    function showUserAdmin() {
+        const list = document.getElementById('user-list-items');
+        list.innerHTML = `
+            <div style="padding:10px; border-bottom:1px solid #333;">
+                <b>abdullah@awtad.sa</b> (Client)
+                <button class="btn" onclick="changePriv('abdullah@awtad.sa', 'owner')">Make Owner</button>
+            </div>
+        `;
+        document.getElementById('userModal').style.display = 'flex';
+    }
 
-		function toggleSet() { const m = document.getElementById('setMenu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
-		function nav(id, el) {
-			document.querySelectorAll('section').forEach(s => s.style.display='none');
-			document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-			document.getElementById(id).style.display='block';
-			el.classList.add('active');
-		}
-		function closeModals(e) { if(!e || e.target.classList.contains('modal-overlay')) document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
-		
-		// Desktop Toggle
-		function toggleView() {
-			const isDesk = document.body.classList.toggle('desktop-mode');
-			document.getElementById('vIcon').className = isDesk ? "fas fa-mobile-screen" : "fas fa-desktop";
-			toggleSet();
-		}
-	</script>
+    async function changePriv(email, role) {
+        await post({ action: "update_privilege", targetEmail: email, newRole: role });
+        alert("Role Updated");
+    }
+
+    // Helpers
+    async function post(data) {
+        return fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+    }
+    function toggleMenu(e) { e.stopPropagation(); const s = document.getElementById('settings'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; }
+    function showPg(id, el) { 
+        document.getElementById('view-list').style.display = 'none';
+        document.getElementById('view-add').style.display = 'none';
+        document.getElementById(id).style.display = 'block';
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+    function closeM(id) { document.getElementById(id).style.display = 'none'; }
+    window.onclick = () => document.getElementById('settings').style.display = 'none';
+</script>
 </body>
 </html>
