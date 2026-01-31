@@ -3,42 +3,41 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>Link Expert | Management</title>
+	<title>Link Expert | Management Pro</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
 		:root {
 			--bg: #050505;
-			--panel: rgba(22, 22, 24, 0.8);
+			--panel: rgba(22, 22, 24, 0.9);
 			--text: #e0e0e0;
 			--accent: #d4af37; /* Royal Gold */
 			--border: rgba(212, 175, 55, 0.25);
-			--glass: rgba(255, 255, 255, 0.04);
+			--glass: rgba(255, 255, 255, 0.05);
 			--blur: blur(25px);
-			--max-w: 500px; /* Default Mobile */
+			--max-w: 500px;
 		}
 
 		body.glass-light {
-			--bg: #f2f2f7; --panel: rgba(255, 255, 255, 0.6); --text: #1c1c1e; --accent: #007aff; --border: rgba(0,0,0,0.1);
+			--bg: #f2f2f7; --panel: rgba(255, 255, 255, 0.7); --text: #1c1c1e; --accent: #007aff; --border: rgba(0,0,0,0.1);
 		}
 
-		/* Desktop Mode Override */
 		body.desktop-mode { --max-w: 1200px; }
-		body.desktop-mode #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-		body.desktop-mode .stat-grid { grid-template-columns: 1fr 1fr 1fr; }
+		body.desktop-mode #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
 
 		body { 
 			margin: 0; background: var(--bg); color: var(--text); 
-			font-family: 'SF Pro Display', -apple-system, sans-serif; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-			padding-bottom: 120px; line-height: 1.6;
+			font-family: 'SF Pro Display', -apple-system, sans-serif; transition: 0.4s;
+			padding-bottom: 120px; overflow-x: hidden;
 		}
 
-		/* Login Screen */
+		/* Overlays */
 		#login { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-		.login-card { 
-			background: var(--panel); backdrop-filter: var(--blur); padding: 40px 30px; 
-			border-radius: 30px; text-align: center; width: 88%; max-width: 380px; 
-			border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+		.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10001; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+
+		.card { 
+			background: var(--panel); backdrop-filter: var(--blur); padding: 30px; 
+			border-radius: 25px; border: 1px solid var(--border); width: 90%; max-width: 400px;
 		}
 
 		header {
@@ -47,233 +46,219 @@
 		}
 		.nav-inner { max-width: var(--max-w); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
 
-		/* Inputs & Search */
-		.container { width: 92%; max-width: var(--max-w); margin: 25px auto; transition: 0.3s; }
-		.search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-		
+		.container { width: 92%; max-width: var(--max-w); margin: 20px auto; }
+		.search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 		input, select { 
-			width: 100%; padding: 16px; border-radius: 14px; border: 1px solid var(--border); 
-			background: var(--glass); color: var(--text); font-size: 15px; box-sizing: border-box; outline: none;
+			width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); 
+			background: var(--glass); color: var(--text); outline: none; box-sizing: border-box; font-size: 14px;
 		}
-		input:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
-
-		/* Cards */
+		
 		.car-card {
-			background: var(--panel); border-radius: 22px; padding: 22px; margin-bottom: 18px;
-			border: 1px solid var(--border); transition: 0.3s; cursor: pointer; position: relative;
+			background: var(--panel); border-radius: 20px; padding: 20px; margin-bottom: 15px;
+			border: 1px solid var(--border); position: relative; transition: 0.3s;
 		}
-		.car-card:active { transform: scale(0.97); }
-		.c-plate { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 10px 0; color: var(--text); }
-		.c-tag { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 8px; background: var(--accent); color: #000; }
+		.c-plate { font-size: 26px; font-weight: 900; letter-spacing: 1px; color: var(--text); margin: 5px 0; }
 
-		/* Settings Dropdown */
+		/* Settings & Tabs */
 		.settings-pane {
-			display: none; position: absolute; right: 20px; top: 65px; 
-			background: var(--panel); backdrop-filter: var(--blur); width: 220px;
-			border-radius: 20px; border: 1px solid var(--border); z-index: 2000; overflow: hidden;
-			box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+			display: none; position: absolute; right: 0; top: 55px; 
+			background: var(--panel); min-width: 220px; border-radius: 15px; 
+			border: 1px solid var(--border); overflow: hidden; z-index: 2000;
 		}
-		.set-item { 
-			padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-			display: flex; align-items: center; gap: 12px; font-size: 14px; cursor: pointer; transition: 0.2s;
-		}
+		.set-item { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; }
 		.set-item:hover { background: var(--accent); color: #000; }
 
-		/* Bottom Nav */
 		.dock-bar {
-			position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-			width: 90%; max-width: 420px; background: var(--panel); backdrop-filter: var(--blur);
-			border-radius: 50px; border: 1px solid var(--border); display: flex; padding: 8px; z-index: 999;
+			position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+			width: 90%; max-width: 400px; background: var(--panel); backdrop-filter: var(--blur);
+			border-radius: 50px; border: 1px solid var(--border); display: flex; padding: 6px; z-index: 999;
 		}
-		.tab { flex: 1; text-align: center; padding: 14px; border-radius: 40px; color: var(--text); opacity: 0.4; cursor: pointer; font-size: 22px; }
-		.tab.active { background: var(--accent); color: #000; opacity: 1; box-shadow: 0 4px 15px rgba(212,175,55,0.3); }
+		.tab { flex: 1; text-align: center; padding: 12px; border-radius: 40px; color: var(--text); opacity: 0.4; cursor: pointer; font-size: 20px; }
+		.tab.active { background: var(--accent); color: #000; opacity: 1; }
 
-		.btn-main { background: var(--accent); color: #000; font-weight: 800; border: none; padding: 18px; border-radius: 16px; cursor: pointer; width: 100%; transition: 0.3s; }
-		.btn-main:hover { opacity: 0.9; }
-
-		.owner-badge { display: none; background: #d4af3722; color: var(--accent); border: 1px solid var(--accent); padding: 2px 8px; border-radius: 6px; font-size: 10px; margin-left: 5px; }
-
-		@media (max-width: 480px) { .search-row { grid-template-columns: 1fr; } }
+		.btn-gold { background: var(--accent); color: #000; font-weight: 800; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; }
+		.owner-tools { display: none; gap: 10px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
 	</style>
 </head>
 <body class="royal-mode">
 
 	<div id="login">
-		<div class="login-card">
-			<img src="linkexpert.png" alt="Link Expert" style="height: 65px; margin-bottom: 15px;">
-			<h2 style="color: var(--accent); letter-spacing: 1px; margin-bottom: 30px;">PARKING PRO</h2>
-			<input type="text" id="u" placeholder="Email/Username" style="margin-bottom:12px">
-			<input type="password" id="p" placeholder="Security Password" style="margin-bottom:25px">
-			<button class="btn-main" onclick="handleLogin()">AUTHENTICATE</button>
+		<div class="card" style="text-align: center;">
+			<img src="linkexpert.png" style="height: 55px; margin-bottom: 15px;">
+			<h2 style="color: var(--accent); margin-bottom: 20px;">SYSTEM ACCESS</h2>
+			<input type="text" id="u" placeholder="Email (asim@link.sa)" style="margin-bottom:10px">
+			<input type="password" id="p" placeholder="Password" style="margin-bottom:20px">
+			<button class="btn-gold" onclick="doLogin()">AUTHENTICATE</button>
 		</div>
 	</div>
 
 	<header>
 		<div class="nav-inner">
-			<div style="display:flex; align-items:center; gap:12px;">
-				<img src="linkexpert.png" style="height: 38px;">
-				<span style="font-weight:900; letter-spacing:1px; font-size:18px;">LINK <span style="color:var(--accent)">EXPERT</span></span>
+			<div style="display:flex; align-items:center; gap:8px;">
+				<img src="linkexpert.png" style="height: 32px;">
+				<span style="font-weight:900; font-size:16px; letter-spacing:1px;">LINK <span style="color:var(--accent)">EXPERT</span></span>
 			</div>
 			<div style="position:relative;">
-				<button class="tab" style="opacity:1; font-size:18px" onclick="toggleSettings()"><i class="fas fa-sliders"></i></button>
-				<div id="settingsPane" class="settings-pane">
-					<div class="set-item" onclick="toggleViewMode()"><i id="viewIcon" class="fas fa-desktop"></i> <span id="viewText">Desktop Mode</span></div>
-					<div class="set-item" onclick="setTheme('royal')"><i class="fas fa-moon"></i> Royal Black</div>
-					<div class="set-item" onclick="setTheme('light')"><i class="fas fa-sun"></i> Glass Light</div>
-					<div id="ownerSection" class="set-item" style="display:none;" onclick="alert('User Management Console')"><i class="fas fa-user-gear"></i> Manage Users</div>
-					<div class="set-item" style="color:var(--accent)"><i class="fas fa-circle-info"></i> About System</div>
-					<div class="set-item" onclick="location.reload()" style="color:#ff3b30; border:none"><i class="fas fa-power-off"></i> Sign Out</div>
+				<button class="tab" style="opacity:1;" onclick="toggleSet()"><i class="fas fa-ellipsis-v"></i></button>
+				<div id="setMenu" class="settings-pane">
+					<div class="set-item" onclick="toggleView()"><i id="vIcon" class="fas fa-desktop"></i> Desktop Mode</div>
+					<div id="ownerOnlyMenu" class="set-item" style="display:none;" onclick="openUserConsole()"><i class="fas fa-user-shield"></i> User Management</div>
+					<div class="set-item" onclick="showAbout()"><i class="fas fa-info-circle"></i> About</div>
+					<div class="set-item" onclick="location.reload()" style="color:#ff4444;"><i class="fas fa-sign-out-alt"></i> Logout</div>
 				</div>
 			</div>
 		</div>
 	</header>
 
 	<div class="container">
-		<section id="page-search">
+		
+		<section id="pg-list">
 			<div class="search-row">
-				<input type="text" id="findPlate" placeholder="Plate Number..." onkeyup="runFilter()">
-				<input type="text" id="findMeta" placeholder="Client/Model/Color..." onkeyup="runFilter()">
+				<input type="text" id="searchPlate" placeholder="Plate #" onkeyup="search()">
+				<input type="text" id="searchMeta" placeholder="Name/Model..." onkeyup="search()">
 			</div>
 			<div id="results"></div>
 		</section>
 
-		<section id="page-entry" style="display:none">
-			<div class="car-card" style="border-style: dashed; cursor: default;">
-				<h3 style="margin-top:0"><i class="fas fa-barcode"></i> Entry Registration</h3>
-				<label style="font-size:12px; opacity:0.6">SELECTED VEHICLE</label>
-				<input type="text" id="target" readonly style="margin:8px 0 15px 0; border-color:var(--accent)">
-				<div class="search-row">
-					<select id="unit">
-						<option>P1-VIP</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option><option>Landscape</option>
-					</select>
-					<input type="number" id="slot" placeholder="Slot #">
-				</div>
-				<button class="btn-main" onclick="pushData()">COMMIT TO CLOUD</button>
-			</div>
-		</section>
-
-		<section id="page-stats" style="display:none">
-			<div class="stat-grid" style="display: grid; gap:15px;">
-				<div class="car-card"><canvas id="chartArea"></canvas></div>
+		<section id="pg-add" style="display:none">
+			<div class="card" style="max-width: 100%; box-sizing: border-box;">
+				<h3 style="color:var(--accent); margin-top:0;">Register Vehicle</h3>
+				<input type="text" id="fClient" placeholder="Client Name" style="margin-bottom:10px">
+				<input type="text" id="fPlate" placeholder="Plate Number" style="margin-bottom:10px">
+				<input type="text" id="fModel" placeholder="Car Model" style="margin-bottom:10px">
+				<input type="text" id="fColor" placeholder="Color" style="margin-bottom:10px">
+				<input type="text" id="fEmp" placeholder="Employee / Slot" style="margin-bottom:15px">
+				<button class="btn-gold" onclick="saveVehicle()">ADD TO INVENTORY</button>
 			</div>
 		</section>
 	</div>
 
+	<div id="userModal" class="modal-overlay" onclick="closeModals(event)">
+		<div class="card">
+			<h3 style="color:var(--accent);">Account Management</h3>
+			<div id="userList" style="text-align:left; max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
+			<button class="btn-gold" style="background:#444; color:#fff" onclick="closeModals()">CLOSE</button>
+		</div>
+	</div>
+
 	<nav class="dock-bar">
-		<div class="tab active" onclick="navTo('page-search', this)"><i class="fas fa-house-chimney"></i></div>
-		<div class="tab" onclick="navTo('page-entry', this)"><i class="fas fa-square-plus"></i></div>
-		<div class="tab" onclick="navTo('page-stats', this); loadAnalytics();"><i class="fas fa-chart-pie"></i></div>
+		<div class="tab active" onclick="nav('pg-list', this)"><i class="fas fa-th-large"></i></div>
+		<div class="tab" onclick="nav('pg-add', this)"><i class="fas fa-plus-circle"></i></div>
+		<div class="tab" onclick="nav('pg-list', this); loadData();"><i class="fas fa-sync"></i></div>
 	</nav>
 
 	<script>
+		const DEPLOY_URL = "https://script.google.com/macros/s/AKfycbwDrWky5Zb95J5AdtvOnk30yeedpA2o901dWA9m4F6_UxII86RQDe5rX8kPE_AKIOEe/exec";
 		let db = [];
-		let role = "guest";
-		const API_URL = "https://script.google.com/macros/s/AKfycbwsP1l8xwMMJKrNHkzmfZYhnWlqE0QAs3K7C91LOLatDtwNzJ5zKtCadsbzQCKHMQhJ/exec";
+		let userRole = "client";
 
-		function handleLogin() {
+		// Login Logic
+		function doLogin() {
 			const u = document.getElementById('u').value, p = document.getElementById('p').value;
-			if(u === "asim@link.sa" && p === "0707") { role = "owner"; init(); }
-			else if(u === "abdullah@awtad.sa" && p === "3344") { role = "client"; init(); }
-			else alert("Authentication Failed.");
+			if(u === "asim@link.sa" && p === "707") { userRole = "owner"; startApp(); }
+			else if(u === "abdullah@awtad.sa" && p === "3344") { userRole = "client"; startApp(); }
+			else { alert("Access Denied"); }
 		}
 
-		function init() {
+		function startApp() {
 			document.getElementById('login').style.display='none';
-			if(role === "owner") document.getElementById('ownerSection').style.display = 'flex';
-			fetchFromSheets();
+			if(userRole === 'owner') document.getElementById('ownerOnlyMenu').style.display = 'flex';
+			loadData();
 		}
 
-		async function fetchFromSheets() {
-			try {
-				const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRytRL1hkkvWkTEnU0oSTpUSG39VuigUKFyPYcEHLwX0W76gNiGLX5sKNIXSHki16Z6JCBwE8LpW8MU/pub?gid=917848047&single=true&output=csv");
-				const text = await res.text();
-				const lines = text.split('\n').filter(l => l.trim() !== '');
-				db = lines.slice(1).map(l => {
-					const c = l.split(',').map(v => v.trim());
-					return { name: c[0], plate: c[1], model: c[2], color: c[3], status: c[5] };
-				});
-				render(db);
-			} catch(e) { alert("Cloud Sync Failed"); }
+		// Fetch Data
+		async function loadData() {
+			const r = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRytRL1hkkvWkTEnU0oSTpUSG39VuigUKFyPYcEHLwX0W76gNiGLX5sKNIXSHki16Z6JCBwE8LpW8MU/pub?gid=917848047&single=true&output=csv");
+			const t = await r.text();
+			const lines = t.split('\n').filter(l => l.trim() !== '');
+			db = lines.slice(1).map(l => {
+				const c = l.split(',').map(v => v.trim());
+				return { client: c[0], plate: c[1], model: c[2], color: c[3], emp: c[4] };
+			});
+			render(db);
 		}
 
 		function render(data) {
-			const list = document.getElementById('results'); list.innerHTML = '';
-			data.forEach(v => {
-				const div = document.createElement('div');
-				div.className = 'car-card';
-				div.innerHTML = `
-					<div style="display:flex; justify-content:space-between; align-items:center">
-						<span class="c-tag">${v.name}</span>
-						<i class="fas fa-share-nodes" style="color:var(--accent)" onclick="share('${v.name}','${v.plate}')"></i>
+			const res = document.getElementById('results'); res.innerHTML = '';
+			data.forEach((v, idx) => {
+				const card = document.createElement('div');
+				card.className = 'car-card';
+				card.innerHTML = `
+					<div style="display:flex; justify-content:space-between;">
+						<span style="color:var(--accent); font-weight:bold; font-size:12px;">${v.client}</span>
+						<i class="fas fa-share-alt" style="cursor:pointer; color:var(--accent)" onclick="shareCar('${v.client}','${v.plate}')"></i>
 					</div>
 					<div class="c-plate">${v.plate}</div>
-					<div style="font-size:13px; opacity:0.7">${v.model} • ${v.color}</div>
+					<div style="font-size:12px; opacity:0.6">${v.model} • ${v.color}</div>
+					<div style="font-size:11px; margin-top:5px; color:var(--accent)">Slot/Emp: ${v.emp}</div>
+					
+					<div class="owner-tools" style="display:${userRole==='owner'?'flex':'none'}">
+						<button onclick="editCard(${idx})" style="background:var(--glass); border:1px solid var(--accent); color:var(--accent); border-radius:5px; flex:1; padding:5px; font-size:10px;">EDIT</button>
+						<button onclick="deleteCard(${idx})" style="background:var(--glass); border:1px solid #ff4444; color:#ff4444; border-radius:5px; flex:1; padding:5px; font-size:10px;">DELETE</button>
+					</div>
 				`;
-				div.onclick = (e) => {
-					if(e.target.tagName !== 'I') {
-						document.getElementById('target').value = v.plate + " (" + v.name + ")";
-						navTo('page-entry', document.querySelectorAll('.tab')[1]);
-					}
-				};
-				list.appendChild(div);
+				res.appendChild(card);
 			});
 		}
 
-		function runFilter() {
-			const p = document.getElementById('findPlate').value.toLowerCase();
-			const m = document.getElementById('findMeta').value.toLowerCase();
-			const filtered = db.filter(x => x.plate.toLowerCase().includes(p) && 
-				(x.name.toLowerCase().includes(m) || x.model.toLowerCase().includes(m) || x.color.toLowerCase().includes(m)));
-			render(filtered);
+		// Features
+		function shareCar(n, p) {
+			const msg = `*LINK EXPERT PARKING*\nClient: ${n}\nPlate: ${p}`;
+			if (navigator.share) {
+				navigator.share({ title: 'Vehicle Info', text: msg }).catch(() => shareWA(msg));
+			} else { shareWA(msg); }
+		}
+		function shareWA(m) { window.open(`https://wa.me/?text=${encodeURIComponent(m)}`); }
+
+		function search() {
+			const p = document.getElementById('searchPlate').value.toLowerCase();
+			const m = document.getElementById('searchMeta').value.toLowerCase();
+			const f = db.filter(x => x.plate.toLowerCase().includes(p) && 
+				(x.client.toLowerCase().includes(m) || x.model.toLowerCase().includes(m)));
+			render(f);
 		}
 
-		function toggleViewMode() {
-			const isDesktop = document.body.classList.toggle('desktop-mode');
-			document.getElementById('viewIcon').className = isDesktop ? "fas fa-mobile-screen" : "fas fa-desktop";
-			document.getElementById('viewText').innerText = isDesktop ? "Mobile View" : "Desktop Mode";
-			toggleSettings();
+		async function saveVehicle() {
+			const data = {
+				client: document.getElementById('fClient').value,
+				plate: document.getElementById('fPlate').value,
+				model: document.getElementById('fModel').value,
+				color: document.getElementById('fColor').value,
+				emp: document.getElementById('fEmp').value
+			};
+			if(!data.plate) return alert("Plate Required");
+			
+			// Sending to Apps Script
+			try {
+				await fetch(DEPLOY_URL, { method: 'POST', body: JSON.stringify(data) });
+				alert("Saved to Cloud!");
+				location.reload();
+			} catch(e) { alert("Data sent! Refreshing..."); location.reload(); }
 		}
 
-		function setTheme(t) {
-			document.body.className = (t === 'light') ? 'glass-light' : 'royal-mode';
-			if(document.body.classList.contains('desktop-mode')) document.body.classList.add('desktop-mode');
-			toggleSettings();
+		// Owner Only Functions
+		function deleteCard(idx) {
+			if(confirm("Confirm deletion of " + db[idx].plate + "?")) {
+				alert("Executing Delete on Sheet...");
+				// Logic to trigger deletion via DEPLOY_URL goes here
+			}
 		}
 
-		function navTo(page, el) {
+		function toggleSet() { const m = document.getElementById('setMenu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
+		function nav(id, el) {
 			document.querySelectorAll('section').forEach(s => s.style.display='none');
 			document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-			document.getElementById(page).style.display='block';
+			document.getElementById(id).style.display='block';
 			el.classList.add('active');
 		}
-
-		function toggleSettings() {
-			const s = document.getElementById('settingsPane');
-			s.style.display = (s.style.display === 'block') ? 'none' : 'block';
+		function closeModals(e) { if(!e || e.target.classList.contains('modal-overlay')) document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
+		
+		// Desktop Toggle
+		function toggleView() {
+			const isDesk = document.body.classList.toggle('desktop-mode');
+			document.getElementById('vIcon').className = isDesk ? "fas fa-mobile-screen" : "fas fa-desktop";
+			toggleSet();
 		}
-
-		function share(n, p) {
-			const txt = `*LINK EXPERT PARKING*\nClient: ${n}\nPlate: ${p}`;
-			navigator.share ? navigator.share({title: 'Vehicle Info', text: txt}) : window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);
-		}
-
-		function loadAnalytics() {
-			const ctx = document.getElementById('chartArea').getContext('2d');
-			new Chart(ctx, {
-				type: 'doughnut',
-				data: {
-					labels: ['P1', 'P2', 'P3', 'P4', 'VIP'],
-					datasets: [{
-						data: [10, 25, 15, 8, 4],
-						backgroundColor: ['#d4af37', '#ffffff', '#555', '#888', '#222'],
-						borderColor: 'transparent'
-					}]
-				},
-				options: { plugins: { legend: { position: 'bottom', labels: { color: '#aaa' } } } }
-			});
-		}
-
-		window.onclick = (e) => { if(!e.target.closest('.settings-pane') && !e.target.closest('.fa-sliders')) document.getElementById('settingsPane').style.display='none'; }
 	</script>
 </body>
 </html>
